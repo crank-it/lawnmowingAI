@@ -1,26 +1,227 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Colors mapped from CSS variables */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* LawnMowing.ai brand colors */
+  --color-lawn-teal: #7BC4C4;
+  --color-lawn-teal-dark: #5BA8A8;
+  --color-lawn-orange: #F4A460;
+  --color-lawn-orange-dark: #E08D3C;
+  --color-lawn-cream: #FFF4D6;
+  --color-lawn-cream-dark: #F5E8C0;
+  --color-lawn-brown: #5D4E37;
+  --color-lawn-grass: #98D98E;
+
+  /* Legacy aliases for compatibility */
+  --color-beefy-green: #7BC4C4;
+  --color-beefy-green-light: #98D98E;
+  --color-beefy-red: #F4A460;
+  --color-beefy-red-dark: #E08D3C;
+  --color-beefy-cream: #FFF4D6;
+  --color-beefy-cream-dark: #F5E8C0;
+
+  /* Font families */
+  --font-heading: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
+
+  /* Radii */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  /* Custom shadows */
+  --shadow-lawn-sm: 0 4px 20px rgba(0, 0, 0, 0.04);
+  --shadow-lawn-md: 0 8px 40px rgba(0, 0, 0, 0.08);
+  --shadow-lawn-lg: 0 12px 40px rgba(123, 196, 196, 0.15);
+
+  /* Legacy shadow aliases */
+  --shadow-beefy-sm: 0 4px 20px rgba(0, 0, 0, 0.04);
+  --shadow-beefy-md: 0 8px 40px rgba(0, 0, 0, 0.08);
+  --shadow-beefy-lg: 0 12px 40px rgba(123, 196, 196, 0.15);
+
+  /* Chart colors */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Sidebar colors */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Light theme (Customer site) - Warm cream with teal accents */
+:root {
+  --radius: 1rem;
+
+  /* Base - Warm cream background */
+  --background: #FFF4D6;
+  --foreground: #5D4E37;
+
+  /* Card */
+  --card: #ffffff;
+  --card-foreground: #5D4E37;
+
+  /* Popover */
+  --popover: #ffffff;
+  --popover-foreground: #5D4E37;
+
+  /* Primary - Teal */
+  --primary: #7BC4C4;
+  --primary-foreground: #ffffff;
+
+  /* Secondary - Light grass green */
+  --secondary: #E8F5E9;
+  --secondary-foreground: #5D4E37;
+
+  /* Muted - Darker cream */
+  --muted: #F5E8C0;
+  --muted-foreground: #7A6B54;
+
+  /* Accent - Orange CTA */
+  --accent: #F4A460;
+  --accent-foreground: #ffffff;
+
+  /* Destructive */
+  --destructive: #DC2626;
+  --destructive-foreground: #ffffff;
+
+  /* Border/Input */
+  --border: #E8DCC8;
+  --input: #E8DCC8;
+  --ring: #7BC4C4;
+
+  /* Chart colors - Teal gradient */
+  --chart-1: #7BC4C4;
+  --chart-2: #98D98E;
+  --chart-3: #F4A460;
+  --chart-4: #5BA8A8;
+  --chart-5: #C8E6C9;
+
+  /* Sidebar */
+  --sidebar: #FFF4D6;
+  --sidebar-foreground: #5D4E37;
+  --sidebar-primary: #7BC4C4;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #F5E8C0;
+  --sidebar-accent-foreground: #5D4E37;
+  --sidebar-border: #E8DCC8;
+  --sidebar-ring: #7BC4C4;
+}
+
+/* Dark theme (Admin dashboard) - Dark with teal accents */
+.dark {
+  /* Base */
+  --background: #1a1a1a;
+  --foreground: #ffffff;
+
+  /* Card */
+  --card: #222222;
+  --card-foreground: #ffffff;
+
+  /* Popover */
+  --popover: #222222;
+  --popover-foreground: #ffffff;
+
+  /* Primary - Teal for dark mode */
+  --primary: #7BC4C4;
+  --primary-foreground: #1a1a1a;
+
+  /* Secondary */
+  --secondary: #2a2a2a;
+  --secondary-foreground: #aaaaaa;
+
+  /* Muted */
+  --muted: #2a2a2a;
+  --muted-foreground: #888888;
+
+  /* Accent - Orange */
+  --accent: #F4A460;
+  --accent-foreground: #1a1a1a;
+
+  /* Destructive */
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  /* Border/Input */
+  --border: #333333;
+  --input: #333333;
+  --ring: #7BC4C4;
+
+  /* Chart colors */
+  --chart-1: #7BC4C4;
+  --chart-2: #98D98E;
+  --chart-3: #F4A460;
+  --chart-4: #5BA8A8;
+  --chart-5: #C8E6C9;
+
+  /* Sidebar */
+  --sidebar: #222222;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #7BC4C4;
+  --sidebar-primary-foreground: #1a1a1a;
+  --sidebar-accent: #2a2a2a;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #333333;
+  --sidebar-ring: #7BC4C4;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Utility classes for shadows */
+@layer utilities {
+  .shadow-beefy-sm,
+  .shadow-lawn-sm {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  }
+  .shadow-beefy-md,
+  .shadow-lawn-md {
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+  }
+  .shadow-beefy-lg,
+  .shadow-lawn-lg {
+    box-shadow: 0 12px 40px rgba(123, 196, 196, 0.15);
+  }
 }
