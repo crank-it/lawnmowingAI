@@ -5,10 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PropertyData } from "@/types/property";
+import { PropertyMap } from "@/components/shared/property-map";
 
 interface PropertyCardProps {
   address: string;
   propertyData: PropertyData | null;
+  coordinates?: { lat: number; lng: number } | null;
   isLoading?: boolean;
   confidence?: number;
   className?: string;
@@ -25,13 +27,14 @@ const stats = [
 
 function getConfidenceLabel(confidence: number): { label: string; color: string } {
   if (confidence >= 0.8) return { label: "High Confidence", color: "bg-green-100 text-green-700 border-green-200" };
-  if (confidence >= 0.5) return { label: "AI Estimated", color: "bg-beefy-green/10 text-beefy-green border-beefy-green/20" };
+  if (confidence >= 0.5) return { label: "AI Estimated", color: "bg-lawn-teal/10 text-lawn-teal border-lawn-teal/20" };
   return { label: "Rough Estimate", color: "bg-yellow-100 text-yellow-700 border-yellow-200" };
 }
 
 export function PropertyCard({
   address,
   propertyData,
+  coordinates,
   isLoading = false,
   confidence = 0.5,
   className,
@@ -60,7 +63,21 @@ export function PropertyCard({
           )}
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent className="pt-0 space-y-4">
+        {/* Satellite Map View */}
+        {isLoading ? (
+          <Skeleton className="h-48 w-full rounded-xl" />
+        ) : coordinates ? (
+          <PropertyMap
+            lat={coordinates.lat}
+            lng={coordinates.lng}
+            address={address}
+            height="200px"
+            className="shadow-sm"
+          />
+        ) : null}
+
+        {/* Stats Grid */}
         {isLoading ? (
           <div className="grid grid-cols-3 md:grid-cols-6 gap-2 lg:gap-4">
             {stats.map((stat) => (

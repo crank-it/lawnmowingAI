@@ -48,6 +48,7 @@ export function QuoteContent() {
   const address = searchParams.get("address") || "123 Example Street, Dunedin";
 
   const [propertyData, setPropertyData] = useState<PropertyData | null>(null);
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [suburb, setSuburb] = useState<string>("Dunedin");
   const [confidence, setConfidence] = useState<number>(0);
   const [isAnalyzing, setIsAnalyzing] = useState(true);
@@ -72,6 +73,7 @@ export function QuoteContent() {
           accessDifficulty: analysis.accessDifficulty,
           hedgeLength: analysis.hedgeLengthM,
         });
+        setCoordinates(analysis.coordinates);
         setSuburb(analysis.suburb);
         setConfidence(analysis.confidence);
       } catch (error) {
@@ -85,6 +87,8 @@ export function QuoteContent() {
           accessDifficulty: "Easy",
           hedgeLength: 0,
         });
+        // Fallback to Dunedin center
+        setCoordinates({ lat: -45.8788, lng: 170.5028 });
         setConfidence(0.3);
       } finally {
         setIsAnalyzing(false);
@@ -180,6 +184,7 @@ export function QuoteContent() {
             <PropertyCard
               address={address}
               propertyData={propertyData}
+              coordinates={coordinates}
               isLoading={isAnalyzing}
               confidence={confidence}
             />
