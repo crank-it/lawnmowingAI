@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -62,11 +63,17 @@ export default function AboutPage() {
         <Card className="border-0 bg-card rounded-2xl shadow-beefy-md overflow-hidden">
           <CardContent className="p-0">
             <div className="grid md:grid-cols-2 gap-0">
-              {/* Image/Placeholder */}
-              <div className="bg-gradient-to-br from-beefy-green/20 to-beefy-green-light/20 p-8 flex items-center justify-center min-h-[300px]">
+              {/* William Image */}
+              <div className="bg-gradient-to-br from-lawn-teal/10 to-lawn-grass/10 p-6 flex items-center justify-center min-h-[300px]">
                 <div className="text-center">
-                  <div className="h-32 w-32 mx-auto rounded-full bg-secondary flex items-center justify-center mb-4">
-                    <span className="text-6xl">🧑‍🌾</span>
+                  <div className="relative w-48 h-48 mx-auto mb-4 rounded-2xl overflow-hidden shadow-lg">
+                    <Image
+                      src="/william.png"
+                      alt="William - Founder of LawnMowing.ai"
+                      fill
+                      className="object-cover"
+                      priority
+                    />
                   </div>
                   <p className="font-heading font-semibold text-xl">William</p>
                   <p className="text-muted-foreground">Founder & Head Mower</p>

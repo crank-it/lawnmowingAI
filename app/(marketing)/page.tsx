@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AddressInput } from "@/components/marketing/address-input";
@@ -203,7 +204,15 @@ export default function HomePage() {
         {/* About Section */}
         <section className="max-w-3xl mx-auto text-center">
           <Card className="border-0 bg-card rounded-2xl shadow-beefy-md p-5 lg:p-8">
-            <div className="text-4xl lg:text-5xl mb-3 lg:mb-4">👋</div>
+            <div className="relative w-24 h-24 lg:w-32 lg:h-32 mx-auto mb-3 lg:mb-4 rounded-2xl overflow-hidden shadow-lg">
+              <Image
+                src="/william.png"
+                alt="William - Founder of LawnMowing.ai"
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
             <h2 className="font-heading text-xl lg:text-2xl font-semibold mb-3 lg:mb-4">
               Meet William
             </h2>
