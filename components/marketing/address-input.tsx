@@ -47,8 +47,10 @@ export function AddressInput({
 
   // Search for addresses using Addy Solutions
   const searchAddresses = useCallback(async (query: string) => {
-    if (query.length < 3) {
+    // Start searching after just 2 characters for faster response
+    if (query.length < 2) {
       setSuggestions([]);
+      setIsSearching(false);
       return;
     }
 
@@ -67,15 +69,20 @@ export function AddressInput({
     }
   }, []);
 
-  // Debounced search
+  // Debounced search - reduced to 150ms for snappier response
   useEffect(() => {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
 
+    // Show searching indicator immediately when typing
+    if (value.length >= 2) {
+      setIsSearching(true);
+    }
+
     debounceRef.current = setTimeout(() => {
       searchAddresses(value);
-    }, 300);
+    }, 150);
 
     return () => {
       if (debounceRef.current) {
