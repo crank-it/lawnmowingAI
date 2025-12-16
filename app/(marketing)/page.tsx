@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -44,16 +44,27 @@ export default function HomePage() {
   const [address, setAddress] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
+  const addressIdRef = useRef<string | null>(null);
+  const sourceRef = useRef<string | null>(null);
 
-  const handleSubmit = () => {
+  const handleSubmit = (addressId?: string, source?: string) => {
     if (address.trim()) {
+      addressIdRef.current = addressId || null;
+      sourceRef.current = source || null;
       setShowAnalysis(true);
     }
   };
 
   const handleAnalysisComplete = () => {
     setShowAnalysis(false);
-    router.push(`/quote?address=${encodeURIComponent(address)}`);
+    let url = `/quote?address=${encodeURIComponent(address)}`;
+    if (addressIdRef.current) {
+      url += `&addressId=${encodeURIComponent(addressIdRef.current)}`;
+    }
+    if (sourceRef.current) {
+      url += `&source=${encodeURIComponent(sourceRef.current)}`;
+    }
+    router.push(url);
   };
 
   const handleSuburbSelect = (suburb: string) => {

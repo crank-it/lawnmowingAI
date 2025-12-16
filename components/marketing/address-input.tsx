@@ -6,17 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 interface AddressSuggestion {
+  source: string;
   address: string;
-  suburb: string;
-  city: string;
-  lat: number;
-  lng: number;
+  addressId: string;
+  confidence: number;
+  components: {
+    street?: string;
+    suburb?: string;
+    city?: string;
+    postcode?: string;
+  } | null;
 }
 
 interface AddressInputProps {
   value: string;
   onChange: (value: string) => void;
-  onSubmit: () => void;
+  onSubmit: (addressId?: string, source?: string) => void;
   isLoading?: boolean;
   placeholder?: string;
   className?: string;
@@ -34,11 +39,13 @@ export function AddressInput({
   const [isSearching, setIsSearching] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [selectedSource, setSelectedSource] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Search for addresses
+  // Search for addresses using Addy Solutions
   const searchAddresses = useCallback(async (query: string) => {
     if (query.length < 3) {
       setSuggestions([]);
@@ -47,9 +54,9 @@ export function AddressInput({
 
     setIsSearching(true);
     try {
-      const response = await fetch(`/api/search-address?q=${encodeURIComponent(query)}`);
+      const response = await fetch(`/api/address/autocomplete?q=${encodeURIComponent(query)}`);
       const data = await response.json();
-      setSuggestions(data.suggestions || []);
+      setSuggestions(data.results || []);
       setShowSuggestions(true);
       setSelectedIndex(-1);
     } catch (error) {
@@ -93,15 +100,17 @@ export function AddressInput({
     e.preventDefault();
     if (value.trim() && !isLoading) {
       setShowSuggestions(false);
-      onSubmit();
+      onSubmit(selectedAddressId || undefined, selectedSource || undefined);
     }
   };
 
   const handleSelectSuggestion = (suggestion: AddressSuggestion) => {
     onChange(suggestion.address);
+    setSelectedAddressId(suggestion.addressId);
+    setSelectedSource(suggestion.source);
     setShowSuggestions(false);
     setSuggestions([]);
-    // Focus back on input then submit
+    // Focus back on input
     inputRef.current?.focus();
   };
 
@@ -131,6 +140,16 @@ export function AddressInput({
     }
   };
 
+  // Clear selection when value changes manually
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.value);
+    // Clear the selected addressId if user types after selecting
+    if (selectedAddressId) {
+      setSelectedAddressId(null);
+      setSelectedSource(null);
+    }
+  };
+
   return (
     <div ref={containerRef} className="relative">
       <form
@@ -146,7 +165,7 @@ export function AddressInput({
             ref={inputRef}
             type="text"
             value={value}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={handleInputChange}
             onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
@@ -157,6 +176,11 @@ export function AddressInput({
           {isSearching && (
             <span className="text-muted-foreground text-sm animate-pulse">
               🔍
+            </span>
+          )}
+          {selectedAddressId && !isSearching && (
+            <span className="text-lawn-teal text-sm" title="Address verified">
+              ✓
             </span>
           )}
         </div>
@@ -187,7 +211,7 @@ export function AddressInput({
         <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-xl shadow-beefy-md border border-border overflow-hidden z-50">
           <ul className="py-1">
             {suggestions.map((suggestion, index) => (
-              <li key={`${suggestion.address}-${index}`}>
+              <li key={`${suggestion.addressId}-${index}`}>
                 <button
                   type="button"
                   onClick={() => handleSelectSuggestion(suggestion)}
@@ -202,21 +226,27 @@ export function AddressInput({
                     <p className="font-medium text-foreground truncate">
                       {suggestion.address}
                     </p>
-                    {suggestion.suburb && (
+                    {suggestion.components?.suburb && (
                       <p className="text-sm text-muted-foreground">
-                        {suggestion.suburb}
-                        {suggestion.city && suggestion.city !== suggestion.suburb &&
-                          `, ${suggestion.city}`}
+                        {suggestion.components.suburb}
+                        {suggestion.components.city &&
+                          suggestion.components.city !== suggestion.components.suburb &&
+                          `, ${suggestion.components.city}`}
+                        {suggestion.components.postcode &&
+                          ` ${suggestion.components.postcode}`}
                       </p>
                     )}
                   </div>
+                  {suggestion.confidence >= 0.9 && (
+                    <span className="text-lawn-teal text-xs mt-1">✓</span>
+                  )}
                 </button>
               </li>
             ))}
           </ul>
           <div className="px-4 py-2 bg-muted/50 border-t border-border">
             <p className="text-xs text-muted-foreground text-center">
-              🇳🇿 New Zealand addresses only
+              🇳🇿 Powered by Addy Solutions
             </p>
           </div>
         </div>

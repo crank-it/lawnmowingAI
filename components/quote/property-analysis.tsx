@@ -47,16 +47,29 @@ export function PropertyAnalysis({
 
     const fetchCoordinates = async () => {
       try {
-        // Use our search-address API to get coordinates
-        const response = await fetch(`/api/search-address?q=${encodeURIComponent(address)}`);
+        // Use our address autocomplete API to get coordinates
+        const response = await fetch(`/api/address/autocomplete?q=${encodeURIComponent(address)}`);
         const data = await response.json();
 
-        if (data.suggestions && data.suggestions.length > 0) {
-          const firstResult = data.suggestions[0];
-          setCoordinates({
-            lat: firstResult.lat,
-            lng: firstResult.lng,
+        if (data.results && data.results.length > 0) {
+          // Get full details for the first result
+          const firstResult = data.results[0];
+          const detailsResponse = await fetch("/api/address/details", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              addressId: firstResult.addressId,
+              source: firstResult.source,
+            }),
           });
+          const details = await detailsResponse.json();
+
+          if (details.coordinates) {
+            setCoordinates(details.coordinates);
+          } else {
+            // Fallback to Dunedin center if no coordinates
+            setCoordinates({ lat: -45.8788, lng: 170.5028 });
+          }
         } else {
           // Fallback to Dunedin center if no results
           setCoordinates({ lat: -45.8788, lng: 170.5028 });

@@ -26,14 +26,27 @@ interface PropertyAnalysisResponse {
   parcelId?: string;
   confidence: number;
   message?: string;
+  validation?: {
+    linzMatch: boolean;
+    linzAddress: string | null;
+    confidence: number;
+  };
+  terrain?: {
+    elevation: { min: number; max: number; range: number } | null;
+    slope: { percent: number; category: string } | null;
+  };
 }
 
 // Fetch property analysis from our API
-async function analyzeProperty(address: string): Promise<PropertyAnalysisResponse> {
+async function analyzeProperty(
+  address: string,
+  addressId?: string | null,
+  source?: string | null
+): Promise<PropertyAnalysisResponse> {
   const response = await fetch("/api/analyze-property", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ address }),
+    body: JSON.stringify({ address, addressId, source }),
   });
 
   if (!response.ok) {
@@ -46,6 +59,8 @@ async function analyzeProperty(address: string): Promise<PropertyAnalysisRespons
 export function QuoteContent() {
   const searchParams = useSearchParams();
   const address = searchParams.get("address") || "123 Example Street, Dunedin";
+  const addressId = searchParams.get("addressId");
+  const source = searchParams.get("source");
 
   const [propertyData, setPropertyData] = useState<PropertyData | null>(null);
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
@@ -63,7 +78,7 @@ export function QuoteContent() {
     async function fetchPropertyData() {
       setIsAnalyzing(true);
       try {
-        const analysis = await analyzeProperty(address);
+        const analysis = await analyzeProperty(address, addressId, source);
 
         setPropertyData({
           totalArea: analysis.totalAreaSqm,
@@ -75,7 +90,11 @@ export function QuoteContent() {
         });
         setCoordinates(analysis.coordinates);
         setSuburb(analysis.suburb);
-        setConfidence(analysis.confidence);
+        // Use validation confidence if available, otherwise use direct confidence
+        const validationConfidence = analysis.validation?.confidence
+          ? analysis.validation.confidence / 100
+          : analysis.confidence;
+        setConfidence(validationConfidence);
       } catch (error) {
         console.error("Property analysis failed:", error);
         // Fallback to default values
@@ -96,7 +115,7 @@ export function QuoteContent() {
     }
 
     fetchPropertyData();
-  }, [address]);
+  }, [address, addressId, source]);
 
   // Calculate price (only when propertyData is available)
   const priceBreakdown = propertyData
