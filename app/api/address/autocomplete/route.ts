@@ -3,6 +3,28 @@ import { NextRequest, NextResponse } from "next/server";
 const ADDY_API_KEY = process.env.ADDY_API_KEY;
 const ADDY_BASE = "https://api.addysolutions.com/search";
 
+// South Island cities and regions for filtering
+const SOUTH_ISLAND_LOCATIONS = [
+  // Otago
+  "dunedin", "mosgiel", "oamaru", "alexandra", "cromwell", "queenstown",
+  "wanaka", "balclutha", "milton", "palmerston", "port chalmers", "otago",
+  // Canterbury
+  "christchurch", "timaru", "ashburton", "rangiora", "kaiapoi", "rolleston",
+  "lincoln", "geraldine", "temuka", "canterbury",
+  // Southland
+  "invercargill", "gore", "winton", "te anau", "riverton", "southland",
+  // West Coast
+  "greymouth", "hokitika", "westport", "reefton", "west coast",
+  // Nelson/Tasman/Marlborough
+  "nelson", "richmond", "blenheim", "picton", "motueka", "takaka",
+  "marlborough", "tasman",
+];
+
+function isSouthIslandAddress(address: string): boolean {
+  const lowerAddress = address.toLowerCase();
+  return SOUTH_ISLAND_LOCATIONS.some(location => lowerAddress.includes(location));
+}
+
 interface AddyAddress {
   id: string;
   a: string; // Full address
@@ -21,7 +43,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get("q");
 
-    if (!query || query.length < 3) {
+    if (!query || query.length < 2) {
       return NextResponse.json({ results: [] });
     }
 
@@ -41,7 +63,15 @@ export async function GET(request: NextRequest) {
     // Primary source: Addy Solutions
     if (ADDY_API_KEY) {
       try {
-        const addyUrl = `${ADDY_BASE}?key=${ADDY_API_KEY}&s=${encodeURIComponent(query)}&max=6`;
+        // Add "Dunedin" hint if query doesn't already include a city
+        // This helps Addy prioritize South Island results
+        const hasLocationHint = SOUTH_ISLAND_LOCATIONS.some(loc =>
+          query.toLowerCase().includes(loc)
+        );
+        const searchQuery = hasLocationHint ? query : `${query} Dunedin`;
+
+        // Request more results so we have enough after filtering
+        const addyUrl = `${ADDY_BASE}?key=${ADDY_API_KEY}&s=${encodeURIComponent(searchQuery)}&max=15`;
         const addyResponse = await fetch(addyUrl, {
           headers: {
             Accept: "application/json",
@@ -52,12 +82,17 @@ export async function GET(request: NextRequest) {
           const addyData: AddyResponse = await addyResponse.json();
 
           if (addyData.addresses) {
-            addyData.addresses.forEach((addr) => {
+            // Filter to South Island only and limit to 6 results
+            const southIslandAddresses = addyData.addresses
+              .filter(addr => isSouthIslandAddress(addr.a))
+              .slice(0, 6);
+
+            southIslandAddresses.forEach((addr) => {
               results.push({
                 source: "addy",
                 address: addr.a,
                 addressId: addr.id,
-                confidence: 0.95, // Addy has excellent NZ coverage
+                confidence: 0.95,
                 components: {
                   street: addr.street,
                   suburb: addr.suburb,
