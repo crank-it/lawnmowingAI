@@ -22,8 +22,12 @@ export function PropertyMap({
 }: PropertyMapProps) {
   const [mapType, setMapType] = useState<"satellite" | "roadmap">("satellite");
 
-  // Google Maps embed URL with satellite view
-  const mapUrl = `https://www.google.com/maps/embed/v1/view?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&center=${lat},${lng}&zoom=19&maptype=${mapType}`;
+  // Always prefer Google's place search with the address if provided
+  // Google is excellent at NZ address geocoding and will show the correct location
+  // Only fall back to coordinates if no address is provided
+  const mapUrl = address
+    ? `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(address)}&zoom=19&maptype=${mapType}`
+    : `https://www.google.com/maps/embed/v1/view?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&center=${lat},${lng}&zoom=19&maptype=${mapType}`;
 
   return (
     <div className={cn("relative rounded-xl overflow-hidden", className)}>
